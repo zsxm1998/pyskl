@@ -1,6 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
 from mmcv.runner import DistEvalHook as BasicDistEvalHook
+import torch
+import torch.nn.functional as F
 
 
 class DistEvalHook(BasicDistEvalHook):
@@ -212,3 +214,31 @@ def binary_precision_recall_curve(y_score, y_true):
     sl = slice(last_ind, None, -1)
 
     return np.r_[precision[sl], 1], np.r_[recall[sl], 0], thresholds[sl]
+
+
+def ee_loss(scores, labels, func):
+    """Loss of energy expenditure.
+
+    Args:
+        scores (list[np.ndarray]): Prediction value of energy.
+        
+        labels (list[np.ndarray]): Ground truth energy expenditure.
+
+        func (str): "mse" or "percentage"
+
+    Returns:
+        np.float: The loss value.
+    """
+    scores = torch.from_numpy(np.stack(scores))
+    labels = torch.from_numpy(np.stack(labels))
+    if len(labels.shape) == 1:
+        labels = labels.unsqueeze(-1)
+
+    assert scores.shape == labels.shape, f'scores: {scores.shape}, labels: {labels.shape}'
+    if func == 'mse':
+        loss = F.mse_loss(scores, labels)
+    elif func == 'percentage':
+        loss = (torch.abs(scores-labels) / labels.clip(min=1e-6)).mean()
+    else:
+        raise NotImplementedError(f'"func" should be "mse" or "percentage", but got {func}')
+    return loss.numpy()

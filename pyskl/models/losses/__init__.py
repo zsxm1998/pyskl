@@ -3,3 +3,4 @@
 
 from .base import BaseWeightedLoss
 from .cross_entropy_loss import BCELossWithLogits, CrossEntropyLoss
+from .e3v_losses import EEPercentageLoss, MSELoss

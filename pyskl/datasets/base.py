@@ -12,7 +12,7 @@ from mmcv.utils import print_log
 from torch.utils.data import Dataset
 
 from pyskl.smp import auto_mix2
-from ..core import mean_average_precision, mean_class_accuracy, top_k_accuracy
+from ..core import mean_average_precision, mean_class_accuracy, top_k_accuracy, ee_loss
 from .pipelines import Compose
 
 
@@ -172,7 +172,7 @@ class BaseDataset(Dataset, metaclass=ABCMeta):
                 metric_options['top_k_accuracy'], **deprecated_kwargs)
 
         metrics = metrics if isinstance(metrics, (list, tuple)) else [metrics]
-        allowed_metrics = ['top_k_accuracy', 'mean_class_accuracy', 'mean_average_precision']
+        allowed_metrics = ['top_k_accuracy', 'mean_class_accuracy', 'mean_average_precision', 'mse_loss', 'percentage_loss']
 
         for metric in metrics:
             if metric not in allowed_metrics:
@@ -221,6 +221,20 @@ class BaseDataset(Dataset, metaclass=ABCMeta):
                 mAP = mean_average_precision(results, gt_labels_arrays)
                 eval_results['mean_average_precision'] = mAP
                 log_msg = f'\nmean_average_precision\t{mAP:.4f}'
+                print_log(log_msg, logger=logger)
+                continue
+
+            if metric == 'mse_loss':
+                mse = ee_loss(results, gt_labels, 'mse')
+                eval_results['mse_loss'] = mse
+                log_msg = f'\nmse_loss\t{mse:.4f}'
+                print_log(log_msg, logger=logger)
+                continue
+
+            if metric == 'percentage_loss':
+                percentage = ee_loss(results, gt_labels, 'percentage')
+                eval_results['percentage_loss'] = percentage
+                log_msg = f'\npercentage_loss\t{percentage:.4f}'
                 print_log(log_msg, logger=logger)
                 continue
 

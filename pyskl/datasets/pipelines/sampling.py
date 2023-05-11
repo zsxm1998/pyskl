@@ -465,3 +465,67 @@ class SampleFrames:
                     f'twice_sample={self.twice_sample}, '
                     f'out_of_bound_opt={self.out_of_bound_opt})')
         return repr_str
+
+
+@PIPELINES.register_module()
+class AllFrames:
+    def __init__(self,
+                 num_clips=1,
+                 p_interval=1,
+                 seed=255):
+
+        self.num_clips = num_clips
+        self.seed = seed
+        self.p_interval = p_interval
+        if not isinstance(p_interval, tuple):
+            self.p_interval = (p_interval, p_interval)
+
+    def _get_train_clips(self, num_frames):
+        return np.arange(num_frames)
+
+    def _get_test_clips(self, num_frames):
+        return np.arange(num_frames)
+
+    def __call__(self, results):
+        num_frames = results['total_frames']
+
+        if results.get('test_mode', False):
+            inds = self._get_test_clips(num_frames)
+        else:
+            inds = self._get_train_clips(num_frames)
+
+        inds = np.mod(inds, num_frames)
+        start_index = results['start_index']
+        inds = inds + start_index
+
+        if 'keypoint' in results:
+            kp = results['keypoint']
+            assert num_frames == kp.shape[1]
+            num_person = kp.shape[0]
+            num_persons = [num_person] * num_frames
+            for i in range(num_frames):
+                j = num_person - 1
+                while j >= 0 and np.all(np.abs(kp[j, i]) < 1e-5):
+                    j -= 1
+                num_persons[i] = j + 1
+            transitional = [False] * num_frames
+            for i in range(1, num_frames - 1):
+                if num_persons[i] != num_persons[i - 1]:
+                    transitional[i] = transitional[i - 1] = True
+                if num_persons[i] != num_persons[i + 1]:
+                    transitional[i] = transitional[i + 1] = True
+            inds_int = inds.astype(int)
+            coeff = np.array([transitional[i] for i in inds_int])
+            inds = (coeff * inds_int + (1 - coeff) * inds).astype(np.float32)
+
+        results['frame_inds'] = inds.astype(int)
+        results['clip_len'] = num_frames
+        results['frame_interval'] = None
+        results['num_clips'] = self.num_clips
+        return results
+
+    def __repr__(self):
+        repr_str = (f'{self.__class__.__name__}('
+                    f'num_clips={self.num_clips}, '
+                    f'seed={self.seed})')
+        return repr_str
