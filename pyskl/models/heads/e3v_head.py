@@ -53,7 +53,6 @@ class EnergyEstimateHead(nn.Module):
         Returns:
             torch.Tensor: The classification scores for input samples.
         """
-
         if isinstance(x, list):
             for item in x:
                 assert len(item.shape) == 2
@@ -84,7 +83,7 @@ class EnergyEstimateHead(nn.Module):
                 x = x.reshape(N, M, C)
                 x = x.mean(dim=1)
 
-        assert x.shape[1] == self.in_c
+        assert x.shape[1] == self.in_c, f'in_channels:{self.in_c}, x.shape:{x.shape}'
         if self.dropout is not None:
             x = self.dropout(x)
 

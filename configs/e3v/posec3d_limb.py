@@ -20,7 +20,7 @@ model = dict(
     test_cfg=dict(average_clips='score')) #使用score而不是prob来避免将模型输入经过softmax
 
 dataset_type = 'PoseDataset'
-ann_file = '/medical-data/zsxm/e3v/resized_data/annotations_track.pkl'
+ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/one_breath.pkl'
 left_kp = [1, 3, 5, 7, 9, 11, 13, 15]
 right_kp = [2, 4, 6, 8, 10, 12, 14, 16]
 skeletons = [[0, 5], [0, 6], [5, 7], [7, 9], [6, 8], [8, 10], [5, 11],
