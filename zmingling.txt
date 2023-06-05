@@ -1,0 +1,11 @@
+CUDA_VISIBLE_DEVICES=0,1 bash tools/dist_train.sh configs/e3v/posec3d_joint.py 2 --validate --test-last --test-best
+
+CUDA_VISIBLE_DEVICES=0,1 bash tools/dist_train.sh configs/e3v/posec3d_limb.py 2 --validate --test-last --test-best
+
+CUDA_VISIBLE_DEVICES=0,1 bash tools/dist_train.sh configs/e3v/stgcn++_b.py 2 --validate --test-last --test-best
+
+CUDA_VISIBLE_DEVICES=0,1 bash tools/dist_train.sh configs/e3v/stgcn++_j.py 2 --validate --test-last --test-best
+
+CUDA_VISIBLE_DEVICES=0,1 bash tools/dist_train.sh configs/e3v/stgcn++_bm.py 2 --validate --test-last --test-best
+
+CUDA_VISIBLE_DEVICES=2 bash tools/dist_train.sh configs/e3v/stgcn++_jm.py 1 --validate --test-last --test-best

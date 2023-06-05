@@ -15,7 +15,7 @@ model = dict(
     test_cfg=dict(average_clips='score'))
 
 dataset_type = 'PoseDataset'
-ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/one_breath.pkl'
+ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/one_breath_per_hour.pkl'
 train_pipeline = [
     dict(type='PreNormalize2D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['bm']),

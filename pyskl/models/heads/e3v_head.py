@@ -38,7 +38,8 @@ class EnergyEstimateHead(nn.Module):
         self.mode = mode
 
         self.in_c = in_channels
-        self.fc = nn.Sequential(nn.Linear(self.in_c, 1), nn.ReLU())
+        self.fc = nn.Linear(self.in_c, 1)
+        self.relu = nn.ReLU()
 
     def init_weights(self):
         """Initiate the parameters from scratch."""
@@ -88,6 +89,8 @@ class EnergyEstimateHead(nn.Module):
             x = self.dropout(x)
 
         eee = self.fc(x)
+        if not self.training:
+            eee = self.relu(eee)
         return eee
     
     def loss(self, eee, label):
