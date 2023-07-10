@@ -242,3 +242,33 @@ def ee_loss(scores, labels, func):
     else:
         raise NotImplementedError(f'"func" should be "mse" or "percentage", but got {func}')
     return loss.numpy()
+
+def bin_cross_entropy(scores, labels, size=5, sigma=0.6):
+    scores = torch.from_numpy(np.stack(scores))
+    labels = torch.from_numpy(np.stack(labels))
+
+    kernel = torch.arange(size, dtype=torch.float32) - (size - 1) / 2
+    kernel = torch.exp(-kernel.pow(2) / (2 * sigma**2))
+    kernel = kernel / kernel.sum()
+    half_size = (size - 1) / 2
+
+    smooth_labels = torch.zeros_like(scores)
+    for i, clsidx in enumerate(labels):
+        ks = max(-clsidx+half_size, 0)
+        ke = kernel.size(0) - max(clsidx + half_size - scores.size(1) + 1, 0)
+        smooth_labels[i, max(0, clsidx-half_size):] = kernel[ks:ke]
+    
+    return F.cross_entropy(scores, smooth_labels).numpy()
+
+def bin_percentage_loss(scores, labels, bin=0.1):
+    scores = torch.from_numpy(np.stack(scores))
+    labels = torch.from_numpy(np.stack(labels))
+    print('scores.shape:', scores.shape, 'labels.shape', labels.shape)
+
+    cls_idx = torch.argmax(scores, dim=1)
+    assert cls_idx.shape == labels.shape, f'cls_idx: {cls_idx.shape}, labels: {labels.shape}'
+    cls_idx = cls_idx * bin
+    labels = labels * bin
+    loss = (torch.abs(cls_idx-labels) / labels.clip(min=1e-6)).mean()
+    
+    return loss.numpy()

@@ -39,7 +39,7 @@ def grab_gpu(device_id):
     os.environ['CUDA_VISIBLE_DEVICES'] = f'{device_id}'
     device = torch.device(f'cuda:0')
     pynvml.nvmlInit()
-    handle = pynvml.nvmlDeviceGetHandleByIndex(0)
+    handle = pynvml.nvmlDeviceGetHandleByIndex(device_id)
     pid = os.getpid()
     tensor_list = []
     compute_flag = False

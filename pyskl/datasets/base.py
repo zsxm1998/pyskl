@@ -12,8 +12,9 @@ from mmcv.utils import print_log
 from torch.utils.data import Dataset
 
 from pyskl.smp import auto_mix2
-from ..core import mean_average_precision, mean_class_accuracy, top_k_accuracy, ee_loss
+from ..core import mean_average_precision, mean_class_accuracy, top_k_accuracy, ee_loss, bin_cross_entropy, bin_percentage_loss
 from .pipelines import Compose
+from sklearn import metrics as sm
 
 
 class BaseDataset(Dataset, metaclass=ABCMeta):
@@ -172,7 +173,7 @@ class BaseDataset(Dataset, metaclass=ABCMeta):
                 metric_options['top_k_accuracy'], **deprecated_kwargs)
 
         metrics = metrics if isinstance(metrics, (list, tuple)) else [metrics]
-        allowed_metrics = ['top_k_accuracy', 'mean_class_accuracy', 'mean_average_precision', 'mse_loss', 'percentage_loss']
+        allowed_metrics = ['top_k_accuracy', 'mean_class_accuracy', 'mean_average_precision', 'mse_loss', 'percentage_loss', 'bin_ce', 'bin_percentage']
 
         for metric in metrics:
             if metric not in allowed_metrics:
@@ -211,6 +212,8 @@ class BaseDataset(Dataset, metaclass=ABCMeta):
                 eval_results['mean_class_accuracy'] = mean_acc
                 log_msg = f'\nmean_acc\t{mean_acc:.4f}'
                 print_log(log_msg, logger=logger)
+                print_log(f'classification report:\n{sm.classification_report(gt_labels, np.argmax(results, axis=1))}', logger=logger)
+                print_log(f'confusion matrix:\n{sm.confusion_matrix(gt_labels, np.argmax(results, axis=1))}', logger=logger)
                 continue
 
             if metric == 'mean_average_precision':
@@ -235,6 +238,20 @@ class BaseDataset(Dataset, metaclass=ABCMeta):
                 percentage = ee_loss(results, gt_labels, 'percentage')
                 eval_results['percentage_loss'] = percentage
                 log_msg = f'\npercentage_loss\t{percentage:.4f}'
+                print_log(log_msg, logger=logger)
+                continue
+
+            if metric == 'bin_ce':
+                bin_ce = bin_cross_entropy(results, gt_labels)
+                eval_results['bin_ce'] = bin_ce
+                log_msg = f'\nbin_ce\t{bin_ce:.4f}'
+                print_log(log_msg, logger=logger)
+                continue
+
+            if metric == 'bin_percentage':
+                bin_percentage = bin_percentage_loss(results, gt_labels)
+                eval_results['bin_percentage'] = bin_percentage
+                log_msg = f'\nbin_percentage\t{bin_percentage:.4f}'
                 print_log(log_msg, logger=logger)
                 continue
 

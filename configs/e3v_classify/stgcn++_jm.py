@@ -6,20 +6,14 @@ model = dict(
         gcn_with_res=True,
         tcn_type='mstcn',
         graph_cfg=dict(layout='coco', mode='spatial')),
-    cls_head=dict(
-        type='EnergyEstimateHead',
-        in_channels=256,
-        mode='GCN',
-        loss_func=dict(type='MSELoss'),
-        dropout=0.1),
-    test_cfg=dict(average_clips='score'))
+    cls_head=dict(type='GCNHead', num_classes=6, in_channels=256))
 
 dataset_type = 'PoseDataset'
-ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/per_hour_running.pkl'
+ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/per_hour_category.pkl'
 train_pipeline = [
     dict(type='PreNormalize2D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['jm']),
-    dict(type='AllFrames', num_clips=1),
+    dict(type='UniformSample', clip_len=100),
     dict(type='PoseDecode'),
     dict(type='FormatGCNInput', num_person=1),
     dict(type='Collect', keys=['keypoint', 'label'], meta_keys=[]),
@@ -28,7 +22,7 @@ train_pipeline = [
 val_pipeline = [
     dict(type='PreNormalize2D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['jm']),
-    dict(type='AllFrames', num_clips=1),
+    dict(type='UniformSample', clip_len=100, num_clips=1),
     dict(type='PoseDecode'),
     dict(type='FormatGCNInput', num_person=1),
     dict(type='Collect', keys=['keypoint', 'label'], meta_keys=[]),
@@ -37,7 +31,7 @@ val_pipeline = [
 test_pipeline = [
     dict(type='PreNormalize2D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['jm']),
-    dict(type='AllFrames', num_clips=1),
+    dict(type='UniformSample', clip_len=100, num_clips=10),
     dict(type='PoseDecode'),
     dict(type='FormatGCNInput', num_person=1),
     dict(type='Collect', keys=['keypoint', 'label'], meta_keys=[]),
@@ -55,16 +49,16 @@ data = dict(
     test=dict(type=dataset_type, ann_file=ann_file, pipeline=test_pipeline, split='test'))
 
 # optimizer
-optimizer = dict(type='SGD', lr=0.001, momentum=0.9, weight_decay=0.0005, nesterov=True)
+optimizer = dict(type='SGD', lr=0.1, momentum=0.9, weight_decay=0.0005, nesterov=True)
 optimizer_config = dict(grad_clip=None)
 # learning policy
 lr_config = dict(policy='CosineAnnealing', min_lr=0, by_epoch=False)
-total_epochs = 50
+total_epochs = 16
 checkpoint_config = dict(interval=1)
-evaluation = dict(interval=1, metrics=['percentage_loss', 'mse_loss'])
+evaluation = dict(interval=1, metrics=['top_k_accuracy', 'mean_class_accuracy'], topk=(1, 2))
 log_config = dict(interval=100, hooks=[dict(type='TextLoggerHook')])
 
 # runtime settings
 log_level = 'INFO'
-work_dir = './work_dirs_running/stgcn++/jm'
+work_dir = './work_dirs_classify/stgcn++/jm'
 auto_resume = False

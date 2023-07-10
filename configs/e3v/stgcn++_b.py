@@ -15,7 +15,7 @@ model = dict(
     test_cfg=dict(average_clips='score'))
 
 dataset_type = 'PoseDataset'
-ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/one_breath_per_hour.pkl'
+ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/per_hour.pkl'
 train_pipeline = [
     dict(type='PreNormalize2D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['b']),
@@ -44,18 +44,18 @@ test_pipeline = [
     dict(type='ToTensor', keys=['keypoint', 'label'])
 ]
 data = dict(
-    videos_per_gpu=1,
+    videos_per_gpu=16,
     workers_per_gpu=8,
     test_dataloader=dict(videos_per_gpu=1),
     train=dict(
         type='RepeatDataset',
-        times=1,
+        times=5,
         dataset=dict(type=dataset_type, ann_file=ann_file, pipeline=train_pipeline, split='train')),
     val=dict(type=dataset_type, ann_file=ann_file, pipeline=val_pipeline, split='valid'),
     test=dict(type=dataset_type, ann_file=ann_file, pipeline=test_pipeline, split='test'))
 
 # optimizer
-optimizer = dict(type='RMSprop', lr=0.0001, momentum=0.9, weight_decay=0.0003)
+optimizer = dict(type='SGD', lr=0.001, momentum=0.9, weight_decay=0.0005, nesterov=True)
 optimizer_config = dict(grad_clip=None)
 # learning policy
 lr_config = dict(policy='CosineAnnealing', min_lr=0, by_epoch=False)
@@ -66,5 +66,5 @@ log_config = dict(interval=100, hooks=[dict(type='TextLoggerHook')])
 
 # runtime settings
 log_level = 'INFO'
-work_dir = './work_dirs/e3v/stgcn++/b'
+work_dir = './work_dirs_ori/stgcn++/b2'
 auto_resume = False

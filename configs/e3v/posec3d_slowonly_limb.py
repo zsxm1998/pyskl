@@ -68,20 +68,20 @@ data = dict(
     test_dataloader=dict(videos_per_gpu=1),
     train=dict(
         type='RepeatDataset',
-        times=10,
+        times=2,
         dataset=dict(type=dataset_type, ann_file=ann_file, split='train', pipeline=train_pipeline)),
     val=dict(type=dataset_type, ann_file=ann_file, split='valid', pipeline=val_pipeline),
     test=dict(type=dataset_type, ann_file=ann_file, split='test', pipeline=test_pipeline))
 # optimizer
-optimizer = dict(type='RMSprop', lr=0.1/16, momentum=0.9, weight_decay=0.0003) #lr 4video1gpu 0.1/16
+optimizer = dict(type='RMSprop', lr=0.01/16, momentum=0.9, weight_decay=0.0003) #lr 4video1gpu 0.1/16
 optimizer_config = dict(grad_clip=dict(max_norm=40, norm_type=2))
 # learning policy
 lr_config = dict(policy='CosineAnnealing', by_epoch=False, min_lr=0)
-total_epochs = 24
+total_epochs = 50
 checkpoint_config = dict(interval=1)
 evaluation = dict(interval=1, metrics=['percentage_loss', 'mse_loss'])
 log_config = dict(interval=20, hooks=[dict(type='TextLoggerHook')])
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/e3v/posec3d/slowonly_limb'
+work_dir = './work_dirs_test155/posec3d/slowonly_limb'
 auto_resume = False
