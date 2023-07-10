@@ -13,3 +13,7 @@ CUDA_VISIBLE_DEVICES=2 bash tools/dist_train.sh configs/e3v/stgcn++_jm.py 1 --va
 CUDA_VISIBLE_DEVICES=0,1 bash tools/dist_train.sh configs/e3v_classify/speed_posec3d_c3d_joint.py 2 --validate --test-last --test-best
 
 CUDA_VISIBLE_DEVICES=0,1 bash tools/dist_test.sh configs/e3v_classify/stgcn++_jm.py ./work_dirs_classify/stgcn++/jm/best_top1_acc_epoch_11.pth 2 --out work_dirs_classify/stgcn++/jm_test/best_11.json --eval top_k_accuracy mean_class_accuracy
+
+CUDA_VISIBLE_DEVICES=0,1 bash tools/dist_train.sh configs/e3v_ordinal/posec3d_c3d_joint.py 2 --validate --test-last --test-best
+
+CUDA_VISIBLE_DEVICES=0,1,2,3 bash tools/dist_train.sh configs/e3v_ordinal/posec3d_c3d_joint.py 4 --validate --test-last --test-best

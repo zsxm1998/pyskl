@@ -27,7 +27,7 @@ class EEPercentageLoss(BaseWeightedLoss):
             label = label.unsqueeze(-1)
         assert eee.shape == label.shape, f'eee: {eee.shape}, label: {label.shape}'
         loss = (torch.abs(eee-label) / label.clip(min=1e-6)).mean()
-        return dict(loss = loss)
+        return dict(percentage = loss)
 
 @LOSSES.register_module()
 class MSELoss(BaseWeightedLoss):
@@ -50,38 +50,8 @@ class MSELoss(BaseWeightedLoss):
             label = label.unsqueeze(-1)
         assert eee.shape == label.shape, f'eee: {eee.shape}, label: {label.shape}'
         loss = F.mse_loss(eee, label)
-        return dict(loss = loss)
+        return dict(mse_loss = loss)
     
-@LOSSES.register_module()
-class BinCrossEntropy(BaseWeightedLoss):
-    def __init__(self, size=5, sigma=0.6, loss_weight=1.0):
-        super().__init__(loss_weight=loss_weight)
-        kernel = torch.arange(size, dtype=torch.float32) - (size - 1) / 2
-        kernel = torch.exp(-kernel.pow(2) / (2 * sigma**2))
-        self.kernel = kernel / kernel.sum()
-        self.half_size = (size - 1) / 2
-
-    def _forward(self, cls_score, label):
-        """Forward function.
-
-        Args:
-            cls_score (torch.Tensor): The class score.
-            label (torch.Tensor): The ground truth label.
-
-        Returns:
-            torch.Tensor: The returned BinCrossEntropy loss.
-        """
-        if len(label.shape) == 0:
-            label = label.unsqueeze(-1)
-        smooth_label = torch.zeros_like(cls_score)
-        for i, clsidx in enumerate(label):
-            ks = max(-clsidx+self.half_size, 0)
-            ke = self.kernel.size(0) - max(clsidx + self.half_size - cls_score.size(1) + 1, 0)
-            smooth_label[i, max(0, clsidx-self.half_size):] = self.kernel[ks:ke]
-        
-        loss = F.cross_entropy(cls_score, smooth_label)
-        return dict(loss = loss)
-
 @LOSSES.register_module()
 class BinPercentageLoss(BaseWeightedLoss):
     def __init__(self, bin=0.1, loss_weight=1.0):
@@ -105,4 +75,34 @@ class BinPercentageLoss(BaseWeightedLoss):
         cls_idx = cls_idx * self.bin
         label = label * self.bin
         loss = (torch.abs(cls_idx-label) / label.clip(min=1e-6)).mean()
-        return dict(loss = loss)
+        return dict(bin_percentage = loss)
+    
+@LOSSES.register_module()
+class BinCrossEntropy(BaseWeightedLoss):
+    def __init__(self, size=5, sigma=0.6, loss_weight=1.0):
+        super().__init__(loss_weight=loss_weight)
+        kernel = torch.arange(size, dtype=torch.float32) - (size - 1) / 2
+        kernel = torch.exp(-kernel.pow(2) / (2 * sigma**2))
+        self.kernel = kernel / kernel.sum()
+        self.half_size = (size - 1) // 2
+
+    def _forward(self, cls_score, label):
+        """Forward function.
+
+        Args:
+            cls_score (torch.Tensor): The class score.
+            label (torch.Tensor): The ground truth label.
+
+        Returns:
+            torch.Tensor: The returned BinCrossEntropy loss.
+        """
+        if len(label.shape) == 0:
+            label = label.unsqueeze(-1)
+        smooth_label = torch.zeros_like(cls_score)
+        for i, clsidx in enumerate(label):
+            ks = max(-clsidx+self.half_size, 0)
+            ke = self.kernel.size(0) - max(clsidx + self.half_size - cls_score.size(1) + 1, 0)
+            smooth_label[i, max(0, clsidx-self.half_size): clsidx+self.half_size+1] = self.kernel[ks:ke]
+        
+        loss = F.cross_entropy(cls_score, smooth_label)
+        return dict(bin_ce_loss = loss)
