@@ -258,7 +258,10 @@ class MMEnergyEstimateHead(nn.Module):
         mmfea = self.mm_branch(mmfea)
         if self.dropout is not None:
             mmfea = self.dropout(mmfea)
-
+        if x.size(0) != mmfea.size(0):
+            assert x.size(0) % mmfea.size(0) == 0
+            rep_num = x.size(0) // mmfea.size(0)
+            mmfea = mmfea.repeat_interleave(rep_num, dim=0)
         x = torch.cat([x, mmfea], dim=1)
 
         eee = self.fc(x)

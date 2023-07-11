@@ -53,6 +53,7 @@ test_pipeline = [
 data = dict(
     videos_per_gpu=4,
     workers_per_gpu=2,
+    train_dataloader=dict(drop_last=True),
     test_dataloader=dict(videos_per_gpu=1),
     train=dict(
         type='RepeatDataset',
