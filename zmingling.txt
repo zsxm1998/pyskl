@@ -19,3 +19,5 @@ CUDA_VISIBLE_DEVICES=0,1 bash tools/dist_train.sh configs/e3v_ordinal/posec3d_c3
 CUDA_VISIBLE_DEVICES=0,1,2,3 bash tools/dist_train.sh configs/e3v_ordinal/posec3d_c3d_joint.py 4 --validate --test-last --test-best
 
 CUDA_VISIBLE_DEVICES=0,1 bash tools/dist_train.sh configs/e3v_mm/posec3d_c3d_joint.py 2 --validate --test-last --test-best
+
+CUDA_VISIBLE_DEVICES=1 bash tools/dist_train.sh configs/e3v_ordinal/toytest.py 1 --validate --test-last --test-best

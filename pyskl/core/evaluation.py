@@ -3,6 +3,7 @@ import numpy as np
 from mmcv.runner import DistEvalHook as BasicDistEvalHook
 import torch
 import torch.nn.functional as F
+from scipy.stats import spearmanr, pearsonr
 
 
 class DistEvalHook(BasicDistEvalHook):
@@ -243,6 +244,7 @@ def ee_loss(scores, labels, func):
         raise NotImplementedError(f'"func" should be "mse" or "percentage", but got {func}')
     return loss.numpy()
 
+
 def bin_cross_entropy(scores, labels, size=5, sigma=0.6):
     scores = torch.from_numpy(np.stack(scores))
     labels = torch.from_numpy(np.stack(labels))
@@ -260,6 +262,7 @@ def bin_cross_entropy(scores, labels, size=5, sigma=0.6):
     
     return F.cross_entropy(scores, smooth_labels).numpy()
 
+
 def bin_percentage_lossfunc(scores, labels, bin=0.1):
     scores = torch.from_numpy(np.stack(scores))
     labels = torch.from_numpy(np.stack(labels))
@@ -271,3 +274,17 @@ def bin_percentage_lossfunc(scores, labels, bin=0.1):
     loss = (torch.abs(cls_idx-labels) / labels.clip(min=1e-6)).mean()
     
     return loss.numpy()
+
+
+def correlation_coefficient(scores, labels, mode, bin=0.1):
+    if mode == 'bin':
+        scores = np.stack(scores).argmax(axis=1) * bin
+        labels = np.stack(labels) * bin
+    elif mode == 'regression':
+        scores = np.stack(scores).squeeze(axis=1)
+        labels = np.stack(labels)
+    else:
+        raise NotImplementedError(f'"mode" should be "bin" or "regression", but got {mode}')
+    pearson, _ = pearsonr(scores, labels)
+    spearman, _ = spearmanr(scores, labels)
+    return pearson, spearman

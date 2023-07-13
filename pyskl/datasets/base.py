@@ -12,7 +12,7 @@ from mmcv.utils import print_log
 from torch.utils.data import Dataset
 
 from pyskl.smp import auto_mix2
-from ..core import mean_average_precision, mean_class_accuracy, top_k_accuracy, ee_loss, bin_cross_entropy, bin_percentage_lossfunc
+from ..core import mean_average_precision, mean_class_accuracy, top_k_accuracy, ee_loss, bin_cross_entropy, bin_percentage_lossfunc, correlation_coefficient
 from .pipelines import Compose
 from sklearn import metrics as sm
 
@@ -174,7 +174,8 @@ class BaseDataset(Dataset, metaclass=ABCMeta):
 
         metrics = metrics if isinstance(metrics, (list, tuple)) else [metrics]
         allowed_metrics = ['top_k_accuracy', 'mean_class_accuracy', 'mean_average_precision',
-                           'mse_loss', 'percentage_loss', 'bin_ce_loss', 'bin_percentage_loss']
+                           'mse_loss', 'percentage_loss', 'bin_ce_loss', 'bin_percentage_loss',
+                           'corr', 'bin_corr']
 
         for metric in metrics:
             if metric not in allowed_metrics:
@@ -253,6 +254,22 @@ class BaseDataset(Dataset, metaclass=ABCMeta):
                 bin_percentage_loss = bin_percentage_lossfunc(results, gt_labels)
                 eval_results['bin_percentage_loss'] = bin_percentage_loss
                 log_msg = f'\nbin_percentage_loss\t{bin_percentage_loss:.4f}'
+                print_log(log_msg, logger=logger)
+                continue
+
+            if metric == 'corr':
+                pearsonr, spearmanr = correlation_coefficient(results, gt_labels, mode='regression')
+                eval_results['pearsonr'] = pearsonr
+                eval_results['spearmanr'] = spearmanr
+                log_msg = f'\npearsonr\t{pearsonr:.4f}\tspearmanr\t{spearmanr:.4f}'
+                print_log(log_msg, logger=logger)
+                continue
+
+            if metric == 'bin_corr':
+                pearsonr, spearmanr = correlation_coefficient(results, gt_labels, mode='bin')
+                eval_results['pearsonr'] = pearsonr
+                eval_results['spearmanr'] = spearmanr
+                log_msg = f'\npearsonr\t{pearsonr:.4f}\tspearmanr\t{spearmanr:.4f}'
                 print_log(log_msg, logger=logger)
                 continue
 

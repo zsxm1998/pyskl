@@ -7,13 +7,11 @@ model = dict(
         num_stages=3,
         temporal_downsample=False),
     cls_head=dict(
-        type='EEOrdinalHead',
+        type='EnergyEstimateHead',
         in_channels=256,
-        num_classes=170,
-        dropout=0.1,
-        mode='3D',
-        loss_cls=dict(type='BinCrossEntropy')),
-    test_cfg=dict(average_clips='prob'))
+        loss_func=dict(type='MSELoss'),
+        dropout=0.1),
+    test_cfg=dict(average_clips='score')) #使用score而不是prob来避免将模型输入经过
 
 dataset_type = 'PoseDataset'
 ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/toy_dataset.pkl'
@@ -69,7 +67,7 @@ optimizer_config = dict(grad_clip=dict(max_norm=40, norm_type=2))
 lr_config = dict(policy='CosineAnnealing', by_epoch=False, min_lr=0)
 total_epochs = 1
 checkpoint_config = dict(interval=1)
-evaluation = dict(interval=1, metrics=['bin_percentage_loss', 'bin_ce_loss'])
+evaluation = dict(interval=1, metrics=['percentage_loss', 'mse_loss', 'corr'])
 log_config = dict(interval=20, hooks=[dict(type='TextLoggerHook')])
 log_level = 'INFO'
 work_dir = './work_dirs_toy_test/'
