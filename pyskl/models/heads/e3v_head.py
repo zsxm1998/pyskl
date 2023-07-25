@@ -21,7 +21,7 @@ class EnergyEstimateHead(nn.Module):
     def __init__(self,
                  in_channels,
                  loss_func=dict(type='MSELoss'),
-                 dropout=0.2,
+                 dropout=0.0,
                  init_std=0.01,
                  mode='3D'):
         super().__init__()
@@ -37,7 +37,12 @@ class EnergyEstimateHead(nn.Module):
         self.mode = mode
 
         self.in_c = in_channels
-        self.fc = nn.Linear(self.in_c, 1)
+        # self.fc = nn.Linear(self.in_c, 1)
+        self.fc = nn.Sequential(
+            nn.Linear(self.in_c, self.in_c),
+            nn.Tanh(),
+            nn.Linear(self.in_c, 1)
+        )
         self.relu = nn.ReLU()
 
     def init_weights(self):
@@ -101,12 +106,13 @@ class EEOrdinalHead(nn.Module):
     def __init__(self,
                  num_classes,
                  in_channels,
-                 loss_func=dict(type='BinCrossEntropy'),
-                 dropout=0.5,
+                 loss_func,
+                 dropout=0.0,
                  init_std=0.01,
                  mode='3D',
                  **kwargs):
         super().__init__()
+        self.gss_flag = loss_func['type'] == 'GSSLoss'
         self.loss_func = build_loss(loss_func)
         self.loss_percentage = build_loss(dict(type='BinPercentageLoss'))
 
@@ -120,7 +126,12 @@ class EEOrdinalHead(nn.Module):
         self.mode = mode
 
         self.in_c = in_channels
-        self.fc_cls = nn.Linear(self.in_c, num_classes)
+        #self.fc_cls = nn.Linear(self.in_c, num_classes)
+        self.fc_cls = nn.Sequential(
+            nn.Linear(self.in_c, self.in_c),
+            nn.Tanh(),
+            nn.Linear(self.in_c, num_classes)
+        )
 
     def init_weights(self):
         normal_init(self.fc_cls, std=self.init_std)
@@ -163,9 +174,12 @@ class EEOrdinalHead(nn.Module):
         cls_score = self.fc_cls(x)
         return cls_score
     
-    def loss(self, cls_score, label):
+    def loss(self, cls_score, label, id_num=None):
         losses = {}
-        losses.update(self.loss_func(cls_score, label))
+        if self.gss_flag:
+            losses.update(self.loss_func(cls_score, label, keys=id_num))
+        else:
+            losses.update(self.loss_func(cls_score, label))
         losses.update(self.loss_percentage(cls_score, label))
         return losses
 
@@ -185,7 +199,7 @@ class MMEnergyEstimateHead(nn.Module):
     def __init__(self,
                  in_channels,
                  loss_func=dict(type='MSELoss'),
-                 dropout=0.2,
+                 dropout=0.0,
                  init_std=0.01,
                  mode='3D'):
         super().__init__()

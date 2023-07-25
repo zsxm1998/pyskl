@@ -13,9 +13,10 @@ model = dict(
         loss_func=dict(type='MSELoss'),
         dropout=0.1),
     test_cfg=dict(average_clips='score'))
+pretrained = '/medical-data/zsxm/pretrained_weight/stgcn++jm_ntu120xset2d.pth'
 
 dataset_type = 'PoseDataset'
-ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/per_hour_running.pkl'
+ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/per_hour_20s.pkl'
 train_pipeline = [
     dict(type='PreNormalize2D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['jm']),
@@ -55,16 +56,16 @@ data = dict(
     test=dict(type=dataset_type, ann_file=ann_file, pipeline=test_pipeline, split='test'))
 
 # optimizer
-optimizer = dict(type='SGD', lr=0.001, momentum=0.9, weight_decay=0.0005, nesterov=True)
+optimizer = dict(type='RMSprop', lr=0.1, momentum=0.9, weight_decay=0.0005)
 optimizer_config = dict(grad_clip=None)
 # learning policy
 lr_config = dict(policy='CosineAnnealing', min_lr=0, by_epoch=False)
-total_epochs = 50
+total_epochs = 16
 checkpoint_config = dict(interval=1)
-evaluation = dict(interval=1, metrics=['percentage_loss', 'mse_loss'])
+evaluation = dict(interval=1, metrics=['percentage_loss', 'mse_loss', 'corr'])
 log_config = dict(interval=100, hooks=[dict(type='TextLoggerHook')])
 
 # runtime settings
 log_level = 'INFO'
-work_dir = './work_dirs_running/stgcn++/jm'
+work_dir = './work_dirs_20s/stgcn++pretrain/jm'
 auto_resume = False

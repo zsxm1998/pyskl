@@ -71,4 +71,4 @@ evaluation = dict(interval=1, metrics=['top_k_accuracy', 'mean_class_accuracy'],
 log_config = dict(interval=20, hooks=[dict(type='TextLoggerHook')])
 log_level = 'INFO'
 work_dir = './work_dirs_speed/posec3d/c3d_joint'
-auto_resume = False
+auto_resume = True

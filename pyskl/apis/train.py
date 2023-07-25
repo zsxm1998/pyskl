@@ -7,7 +7,7 @@ import torch
 import torch.distributed as dist
 from mmcv.engine import multi_gpu_test
 from mmcv.parallel import MMDistributedDataParallel
-from mmcv.runner import DistSamplerSeedHook, EpochBasedRunner, OptimizerHook, build_optimizer, get_dist_info
+from mmcv.runner import DistSamplerSeedHook, EpochBasedRunner, OptimizerHook, build_optimizer, get_dist_info, load_checkpoint
 
 from ..core import DistEvalHook
 from ..datasets import build_dataloader, build_dataset
@@ -85,6 +85,11 @@ def train_model(model,
     data_loaders = [
         build_dataloader(ds, **dataloader_setting) for ds in dataset
     ]
+
+    #add by zsxm
+    if cfg.get('pretrained', False):
+        load_checkpoint(model, cfg.get('pretrained'), map_location='cpu', strict=False, logger=logger)
+        print(f'ZSXM DEBUG: Load checkpoint from: {cfg.get("pretrained")}')
 
     # put model on gpus
     find_unused_parameters = cfg.get('find_unused_parameters', True)

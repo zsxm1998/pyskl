@@ -18,6 +18,10 @@ CUDA_VISIBLE_DEVICES=0,1 bash tools/dist_train.sh configs/e3v_ordinal/posec3d_c3
 
 CUDA_VISIBLE_DEVICES=0,1,2,3 bash tools/dist_train.sh configs/e3v_ordinal/posec3d_c3d_joint.py 4 --validate --test-last --test-best
 
-CUDA_VISIBLE_DEVICES=0,1 bash tools/dist_train.sh configs/e3v_mm/posec3d_c3d_joint.py 2 --validate --test-last --test-best
-
 CUDA_VISIBLE_DEVICES=1 bash tools/dist_train.sh configs/e3v_ordinal/toytest.py 1 --validate --test-last --test-best
+
+CUDA_VISIBLE_DEVICES=2 bash tools/dist_test.sh work_dirs_ordinal/posec3d/c3d_joint/posec3d_c3d_joint.py work_dirs_ordinal/posec3d/c3d_joint/best_bin_percentage_loss_epoch_20.pth 1 --eval bin_percentage_loss bin_ce_loss bin_corr
+
+CUDA_VISIBLE_DEVICES=0,1 bash tools/dist_train.sh configs/e3v/stgcn++_jm.py 2 --validate --test-last --test-best
+
+CUDA_VISIBLE_DEVICES=1 bash tools/dist_train.sh configs/e3v_gss/posec3d_slowonly_joint.py 1 --validate --test-last --test-best

@@ -36,8 +36,9 @@ class TaskRunner:
 
 
 def grab_gpu(device_id):
-    os.environ['CUDA_VISIBLE_DEVICES'] = f'{device_id}'
-    device = torch.device(f'cuda:0')
+    os.environ['CUDA_DEVICE_ORDER'] = "PCI_BUS_ID"
+    #os.environ['CUDA_VISIBLE_DEVICES'] = f'{device_id}'
+    device = torch.device(f'cuda:{device_id}')
     pynvml.nvmlInit()
     handle = pynvml.nvmlDeviceGetHandleByIndex(device_id)
     pid = os.getpid()

@@ -1,21 +1,5 @@
-model = dict(
-    type='Recognizer3D',
-    backbone=dict(
-        type='C3D',
-        in_channels=17,
-        base_channels=32,
-        num_stages=3,
-        temporal_downsample=False),
-    cls_head=dict(
-        type='EnergyEstimateHead',
-        in_channels=256,
-        loss_func=dict(type='L1Loss'),
-        dropout=0.0),
-    test_cfg=dict(average_clips='score')) #使用score而不是prob来避免将模型输入经过softmax
-pretrained = '/medical-data/zsxm/pretrained_weight/c3d_joint_ntu60xsub2d.pth'
-
 dataset_type = 'PoseDataset'
-ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/per_hour_20s.pkl'
+ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/per_hour_20s_bin_id_filter290.pkl'
 left_kp = [1, 3, 5, 7, 9, 11, 13, 15]
 right_kp = [2, 4, 6, 8, 10, 12, 14, 16]
 train_pipeline = [
@@ -28,7 +12,7 @@ train_pipeline = [
     dict(type='Flip', flip_ratio=0.5, left_kp=left_kp, right_kp=right_kp),
     dict(type='GeneratePoseTarget', with_kp=True, with_limb=False),
     dict(type='FormatShape', input_format='NCTHW_Heatmap'),
-    dict(type='Collect', keys=['imgs', 'label'], meta_keys=[]),
+    dict(type='Collect', keys=['imgs', 'label', 'id_num'], meta_keys=[]),
     dict(type='ToTensor', keys=['imgs', 'label'])
 ]
 val_pipeline = [
@@ -52,7 +36,7 @@ test_pipeline = [
     dict(type='ToTensor', keys=['imgs'])
 ]
 data = dict(
-    videos_per_gpu=8,
+    videos_per_gpu=4,
     workers_per_gpu=4,
     test_dataloader=dict(videos_per_gpu=1),
     train=dict(
@@ -62,14 +46,46 @@ data = dict(
     val=dict(type=dataset_type, ann_file=ann_file, split='valid', pipeline=val_pipeline),
     test=dict(type=dataset_type, ann_file=ann_file, split='test', pipeline=test_pipeline))
 # optimizer
-optimizer = dict(type='RMSprop', lr=0.001, momentum=0.9, weight_decay=0.0003) #lr 4video1gpu 0.1/16
+optimizer = dict(type='AdamW', lr=0.001, weight_decay=0.0003) #lr 4video1gpu 0.1/16
 optimizer_config = dict(grad_clip=dict(max_norm=40, norm_type=2))
 # learning policy
 lr_config = dict(policy='CosineAnnealing', by_epoch=False, min_lr=0)
 total_epochs = 24
 checkpoint_config = dict(interval=1)
-evaluation = dict(interval=1, metrics=['percentage_loss', 'l1_loss', 'mse_loss', 'corr'])
+evaluation = dict(interval=1, metrics=['bin_percentage_loss', 'bin_ce_loss', 'bin_corr'])
 log_config = dict(interval=20, hooks=[dict(type='TextLoggerHook')])
 log_level = 'INFO'
-work_dir = 'work_dirs_20s/posec3d_pretrain'
+work_dir = './work_dirs_gss/posec3d/slowonly_joint'
 auto_resume = False
+
+num_classes = 170
+pretrained = '/medical-data/zsxm/pretrained_weight/slowonly_joint_ntu60xsub2d.pth'
+model = dict(
+    type='Recognizer3D',
+    backbone=dict(
+        type='ResNet3dSlowOnly',
+        in_channels=17,
+        base_channels=32,
+        num_stages=3,
+        out_indices=(2, ),
+        stage_blocks=(4, 6, 3),
+        conv1_stride=(1, 1),
+        pool1_stride=(1, 1),
+        inflate=(0, 1, 1),
+        spatial_strides=(2, 2, 2),
+        temporal_strides=(1, 1, 2)),
+    cls_head=dict(
+        type='EEOrdinalHead',
+        num_classes=num_classes,
+        in_channels=512,
+        dropout=0.0,
+        mode='3D',
+        loss_func=dict(
+            type='GSSLoss',
+            total_epochs=total_epochs*data['train']['times'],
+            num_classes=num_classes,
+            err_range=20,
+            lambda1=2.0,
+            lambda2=1.0,
+            temperature = 0.1)),
+    test_cfg=dict(average_clips='score'))

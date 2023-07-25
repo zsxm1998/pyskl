@@ -9,13 +9,12 @@ model = dict(
     cls_head=dict(
         type='EnergyEstimateHead',
         in_channels=256,
-        loss_func=dict(type='L1Loss'),
-        dropout=0.0),
-    test_cfg=dict(average_clips='score')) #使用score而不是prob来避免将模型输入经过softmax
-pretrained = '/medical-data/zsxm/pretrained_weight/c3d_joint_ntu60xsub2d.pth'
+        loss_func=dict(type='MSELoss'),
+        dropout=0.1),
+    test_cfg=dict(average_clips='score'))#使用score而不是prob来避免将模型输入经过softmax
 
 dataset_type = 'PoseDataset'
-ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/per_hour_20s.pkl'
+ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/per_hour_skipping.pkl'
 left_kp = [1, 3, 5, 7, 9, 11, 13, 15]
 right_kp = [2, 4, 6, 8, 10, 12, 14, 16]
 train_pipeline = [
@@ -52,24 +51,24 @@ test_pipeline = [
     dict(type='ToTensor', keys=['imgs'])
 ]
 data = dict(
-    videos_per_gpu=8,
-    workers_per_gpu=4,
+    videos_per_gpu=4,
+    workers_per_gpu=1,
     test_dataloader=dict(videos_per_gpu=1),
     train=dict(
         type='RepeatDataset',
-        times=10,
+        times=8,
         dataset=dict(type=dataset_type, ann_file=ann_file, split='train', pipeline=train_pipeline)),
     val=dict(type=dataset_type, ann_file=ann_file, split='valid', pipeline=val_pipeline),
     test=dict(type=dataset_type, ann_file=ann_file, split='test', pipeline=test_pipeline))
 # optimizer
-optimizer = dict(type='RMSprop', lr=0.001, momentum=0.9, weight_decay=0.0003) #lr 4video1gpu 0.1/16
+optimizer = dict(type='RMSprop', lr=0.01/16, momentum=0.9, weight_decay=0.0003) #lr 4video1gpu 0.1/16
 optimizer_config = dict(grad_clip=dict(max_norm=40, norm_type=2))
 # learning policy
 lr_config = dict(policy='CosineAnnealing', by_epoch=False, min_lr=0)
-total_epochs = 24
+total_epochs = 50
 checkpoint_config = dict(interval=1)
-evaluation = dict(interval=1, metrics=['percentage_loss', 'l1_loss', 'mse_loss', 'corr'])
+evaluation = dict(interval=1, metrics=['percentage_loss', 'mse_loss', 'corr'])
 log_config = dict(interval=20, hooks=[dict(type='TextLoggerHook')])
 log_level = 'INFO'
-work_dir = 'work_dirs_20s/posec3d_pretrain'
+work_dir = './work_dirs_single_sport/skipping   /posec3d/c3d_joint'
 auto_resume = False

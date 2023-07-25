@@ -240,25 +240,38 @@ def ee_loss(scores, labels, func):
         loss = F.mse_loss(scores, labels)
     elif func == 'percentage':
         loss = (torch.abs(scores-labels) / labels.clip(min=1e-6)).mean()
+    elif func == 'l1':
+        loss = F.l1_loss(scores, labels)
     else:
         raise NotImplementedError(f'"func" should be "mse" or "percentage", but got {func}')
     return loss.numpy()
 
 
-def bin_cross_entropy(scores, labels, size=5, sigma=0.6):
+# def bin_cross_entropy(scores, labels, size=5, sigma=0.6):
+#     scores = torch.from_numpy(np.stack(scores))
+#     labels = torch.from_numpy(np.stack(labels))
+
+#     kernel = torch.arange(size, dtype=torch.float32) - (size - 1) / 2
+#     kernel = torch.exp(-kernel.pow(2) / (2 * sigma**2))
+#     kernel = kernel / kernel.sum()
+#     half_size = (size - 1) // 2
+
+#     smooth_labels = torch.zeros_like(scores)
+#     for i, clsidx in enumerate(labels):
+#         ks = max(-clsidx+half_size, 0)
+#         ke = kernel.size(0) - max(clsidx + half_size - scores.size(1) + 1, 0)
+#         smooth_labels[i, max(0, clsidx-half_size): clsidx+half_size+1] = kernel[ks:ke]
+    
+#     return F.cross_entropy(scores, smooth_labels).numpy()
+def bin_cross_entropy(scores, labels, temperature=0.1):
     scores = torch.from_numpy(np.stack(scores))
     labels = torch.from_numpy(np.stack(labels))
 
-    kernel = torch.arange(size, dtype=torch.float32) - (size - 1) / 2
-    kernel = torch.exp(-kernel.pow(2) / (2 * sigma**2))
-    kernel = kernel / kernel.sum()
-    half_size = (size - 1) // 2
-
-    smooth_labels = torch.zeros_like(scores)
-    for i, clsidx in enumerate(labels):
-        ks = max(-clsidx+half_size, 0)
-        ke = kernel.size(0) - max(clsidx + half_size - scores.size(1) + 1, 0)
-        smooth_labels[i, max(0, clsidx-half_size): clsidx+half_size+1] = kernel[ks:ke]
+    smooth_labels = torch.arange(scores.size(1)).repeat(scores.size(0), 1)
+    smooth_labels -= labels.unsqueeze(-1)
+    sigma = torch.tensor(scores.size(1)/16).sqrt()
+    smooth_labels = torch.exp(-smooth_labels.pow(2) / (2 * sigma**2))
+    smooth_labels = torch.softmax(smooth_labels/temperature, dim=1)
     
     return F.cross_entropy(scores, smooth_labels).numpy()
 

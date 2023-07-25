@@ -9,7 +9,7 @@ model = dict(
     cls_head=dict(type='GCNHead', num_classes=120, in_channels=256))
 
 dataset_type = 'PoseDataset'
-ann_file = 'data/nturgbd/ntu120_hrnet.pkl'
+ann_file = '/medical-data/zsxm/运动热量估计/public_dataset/ntu120_hrnet.pkl'
 train_pipeline = [
     dict(type='PreNormalize2D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['jm']),
@@ -49,7 +49,7 @@ data = dict(
     test=dict(type=dataset_type, ann_file=ann_file, pipeline=test_pipeline, split='xsub_val'))
 
 # optimizer
-optimizer = dict(type='SGD', lr=0.1, momentum=0.9, weight_decay=0.0005, nesterov=True)
+optimizer = dict(type='SGD', lr=0.1/8, momentum=0.9, weight_decay=0.0005, nesterov=True)
 optimizer_config = dict(grad_clip=None)
 # learning policy
 lr_config = dict(policy='CosineAnnealing', min_lr=0, by_epoch=False)
@@ -60,4 +60,4 @@ log_config = dict(interval=100, hooks=[dict(type='TextLoggerHook')])
 
 # runtime settings
 log_level = 'INFO'
-work_dir = './work_dirs/stgcn++/stgcn++_ntu120_xsub_hrnet/jm'
+work_dir = './work_dirs_pretrain/stgcn++/stgcn++_ntu120_xsub_hrnet/jm'
