@@ -1,5 +1,5 @@
 dataset_type = 'PoseDataset'
-ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/per_hour_20s_bin_id.pkl'
+ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/per_hour_20s_bin_id_filter290.pkl'
 left_kp = [1, 3, 5, 7, 9, 11, 13, 15]
 right_kp = [2, 4, 6, 8, 10, 12, 14, 16]
 train_pipeline = [
@@ -46,7 +46,8 @@ data = dict(
     val=dict(type=dataset_type, ann_file=ann_file, split='valid', pipeline=val_pipeline),
     test=dict(type=dataset_type, ann_file=ann_file, split='test', pipeline=test_pipeline))
 # optimizer
-optimizer = dict(type='RMSprop', lr=0.001, momentum=0.9, weight_decay=0.0003) #lr 4video1gpu 0.1/16
+#optimizer = dict(type='RMSprop', lr=0.001, momentum=0.9, weight_decay=0.0003) #lr 4video1gpu 0.1/16
+optimizer = dict(type='AdamW', lr=0.001, weight_decay=0.0003)
 optimizer_config = dict(grad_clip=dict(max_norm=40, norm_type=2))
 # learning policy
 lr_config = dict(policy='CosineAnnealing', by_epoch=False, min_lr=0)
@@ -81,7 +82,5 @@ model = dict(
             err_range=20,
             lambda1=2.0,
             lambda2=1.0,
-            temperature = 0.1,
-            loss_size=5, 
-            loss_sigma=0.49)),
+            temperature = 0.1)),
     test_cfg=dict(average_clips='score'))

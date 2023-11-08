@@ -207,7 +207,7 @@ class GSSLoss(BaseWeightedLoss):
             labels = labels.unsqueeze(-1)
         
         gsslabels = []
-        for score, label, key in zip(cls_scores, labels, keys):
+        for score, label, key in zip(cls_scores, labels.tolist(), keys):
             pool = self.gsspool.setdefault(key, GradientPool(label, self.total_epoch, self.num_classes, self.err_range))
             gsslabels.append(pool.get_label(score, self.lambda1, self.lambda2))
         gsslabels = torch.stack(gsslabels).to(labels)

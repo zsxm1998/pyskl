@@ -35,7 +35,7 @@ class TaskRunner:
         return results
 
 
-def grab_gpu(device_id):
+def grab_gpu(device_id, nc):
     os.environ['CUDA_DEVICE_ORDER'] = "PCI_BUS_ID"
     #os.environ['CUDA_VISIBLE_DEVICES'] = f'{device_id}'
     device = torch.device(f'cuda:{device_id}')
@@ -54,7 +54,7 @@ def grab_gpu(device_id):
                     tensor_list.append( torch.zeros(5120, 5120, MEMORY_NUM, dtype=torch.float32, device=device) )
                 except RuntimeError:
                     break
-        else:
+        elif not nc:
             proinfos = pynvml.nvmlDeviceGetComputeRunningProcesses_v3(handle)
             flag = False
             usedGpuMemory = -1
@@ -78,6 +78,7 @@ def get_args():
     parser = argparse.ArgumentParser(description='Hold GPU memory.',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--device', '-d', type=str, default=None, help='GPU index')
+    parser.add_argument('--notcompute', '-nc', action='store_true', help='not use GPU to compute')
 
     return parser.parse_args()
 
@@ -89,5 +90,5 @@ if __name__ == '__main__':
     else:
         device_ids = [int(i) for i in opt.device.replace(' ', '').split(',')]
 
-    kwargs = [{'device_id': i} for i in device_ids]
+    kwargs = [{'device_id': i, 'nc': opt.notcompute} for i in device_ids]
     TaskRunner().run(grab_gpu, kwargs)

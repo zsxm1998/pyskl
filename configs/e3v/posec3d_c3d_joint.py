@@ -15,7 +15,7 @@ model = dict(
 pretrained = '/medical-data/zsxm/pretrained_weight/c3d_joint_ntu60xsub2d.pth'
 
 dataset_type = 'PoseDataset'
-ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/per_hour_20s.pkl'
+ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/old_pkl/per_hour_20s_person_zyl_time.pkl'
 left_kp = [1, 3, 5, 7, 9, 11, 13, 15]
 right_kp = [2, 4, 6, 8, 10, 12, 14, 16]
 train_pipeline = [
@@ -71,5 +71,6 @@ checkpoint_config = dict(interval=1)
 evaluation = dict(interval=1, metrics=['percentage_loss', 'l1_loss', 'mse_loss', 'corr'])
 log_config = dict(interval=20, hooks=[dict(type='TextLoggerHook')])
 log_level = 'INFO'
-work_dir = 'work_dirs_20s/posec3d_pretrain'
+work_dir = 'work_dirs_person/posec3d_pretrain/zyl_time'
 auto_resume = False
+1
