@@ -31,4 +31,4 @@ CUDA_VISIBLE_DEVICES=1 bash tools/dist_test.sh work_dirs_person/posec3d_pretrain
 
 # for CVPR
 
-CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 bash tools/dist_train.sh configs/0e3v_cvpr/posec3d_slowonly_joint.py 1 --validate --test-last --test-best
+CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=0 bash tools/dist_train.sh configs/0e3v_cvpr/stgcn_j.py 1 --validate --test-last --test-best

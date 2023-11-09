@@ -132,3 +132,5 @@ dev.ipynb
 test.ipynb
 
 *.mp4
+
+zcvpr/*
