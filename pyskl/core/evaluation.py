@@ -4,6 +4,7 @@ from mmcv.runner import DistEvalHook as BasicDistEvalHook
 import torch
 import torch.nn.functional as F
 from scipy.stats import spearmanr, pearsonr
+from sklearn.metrics import r2_score
 
 
 class DistEvalHook(BasicDistEvalHook):
@@ -299,5 +300,6 @@ def correlation_coefficient(scores, labels, mode, bin=0.1):
     else:
         raise NotImplementedError(f'"mode" should be "bin" or "regression", but got {mode}')
     pearson, _ = pearsonr(scores, labels)
-    spearman, _ = spearmanr(scores, labels)
-    return pearson, spearman
+    #spearman, _ = spearmanr(scores, labels)
+    r2 = r2_score(labels, scores)
+    return pearson, r2

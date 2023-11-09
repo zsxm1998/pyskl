@@ -27,3 +27,8 @@ CUDA_VISIBLE_DEVICES=0,1 bash tools/dist_train.sh configs/e3v/stgcn++_jm.py 2 --
 CUDA_VISIBLE_DEVICES=2 bash tools/dist_train.sh configs/e3v/posec3d_c3d_joint.py 1 --validate --test-last --test-best
 
 CUDA_VISIBLE_DEVICES=1 bash tools/dist_test.sh work_dirs_person/posec3d_pretrain/zyl/posec3d_c3d_joint.py work_dirs_person/posec3d_pretrain/zyl/best_percentage_loss_epoch_21.pth 1 --eval percentage_loss l1_loss mse_loss corr
+
+
+# for CVPR
+
+CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 bash tools/dist_train.sh configs/0e3v_cvpr/posec3d_slowonly_joint.py 1 --validate --test-last --test-best

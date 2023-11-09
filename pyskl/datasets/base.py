@@ -265,18 +265,18 @@ class BaseDataset(Dataset, metaclass=ABCMeta):
                 continue
 
             if metric == 'corr':
-                pearsonr, spearmanr = correlation_coefficient(results, gt_labels, mode='regression')
+                pearsonr, r2 = correlation_coefficient(results, gt_labels, mode='regression')
                 eval_results['pearsonr'] = pearsonr
-                eval_results['spearmanr'] = spearmanr
-                log_msg = f'\npearsonr\t{pearsonr:.4f}\tspearmanr\t{spearmanr:.4f}'
+                eval_results['r2'] = r2
+                log_msg = f'\npearsonr\t{pearsonr:.4f}\tr2\t{r2:.4f}'
                 print_log(log_msg, logger=logger)
                 continue
 
             if metric == 'bin_corr':
-                pearsonr, spearmanr = correlation_coefficient(results, gt_labels, mode='bin')
+                pearsonr, r2 = correlation_coefficient(results, gt_labels, mode='bin')
                 eval_results['pearsonr'] = pearsonr
-                eval_results['spearmanr'] = spearmanr
-                log_msg = f'\npearsonr\t{pearsonr:.4f}\tspearmanr\t{spearmanr:.4f}'
+                eval_results['r2'] = r2
+                log_msg = f'\npearsonr\t{pearsonr:.4f}\tr2\t{r2:.4f}'
                 print_log(log_msg, logger=logger)
                 continue
 
