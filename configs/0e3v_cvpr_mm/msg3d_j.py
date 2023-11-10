@@ -1,5 +1,5 @@
 model = dict(
-    type='RecognizerGCN',
+    type='EEMMRecognizerGCN',
     backbone=dict(
 		type='MSG3D',
         num_person=1,

@@ -22,7 +22,6 @@ class Recognizer3D(BaseRecognizer):
         cls_score = self.cls_head(x)
         gt_label = label.squeeze()
         loss_cls = self.cls_head.loss(cls_score, gt_label, **kwargs)
-        #print(f'*********ZSXMDEBUG:{cls_score}  {gt_label}  {loss_cls}')
         losses.update(loss_cls)
 
         return losses

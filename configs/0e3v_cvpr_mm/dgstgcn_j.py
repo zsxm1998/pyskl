@@ -1,5 +1,5 @@
 model = dict(
-    type='RecognizerGCN',
+    type='EEMMRecognizerGCN',
     backbone=dict(
         type='DGSTGCN',
         gcn_ratio=0.125,

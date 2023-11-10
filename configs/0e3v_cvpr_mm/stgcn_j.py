@@ -1,5 +1,5 @@
 model = dict(
-    type='RecognizerGCN',
+    type='EEMMRecognizerGCN',
     backbone=dict(
         type='STGCN',
         graph_cfg=dict(layout='coco', mode='stgcn_spatial')),

@@ -1,5 +1,5 @@
 model = dict(
-    type='Recognizer3D',
+    type='EEMMRecognizer3D',
     backbone=dict(
         type='X3D',
         gamma_d=1,

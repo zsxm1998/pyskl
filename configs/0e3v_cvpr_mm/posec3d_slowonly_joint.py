@@ -1,5 +1,5 @@
 model = dict(
-    type='Recognizer3D',
+    type='EEMMRecognizer3D',
     backbone=dict(
         type='ResNet3dSlowOnly',
         in_channels=17,

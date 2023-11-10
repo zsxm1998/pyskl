@@ -1,7 +1,7 @@
 from ..builder import RECOGNIZERS
 from .base import BaseRecognizer
 
-
+# 这是用来RGBPoseC3D的，不是用来处理运动热量估计的多模态的。
 @RECOGNIZERS.register_module()
 class MMRecognizer3D(BaseRecognizer):
     """MultiModality 3D recognizer model framework."""
