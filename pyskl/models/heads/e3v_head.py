@@ -221,7 +221,8 @@ class MMEnergyEstimateHead(nn.Module):
 
         self.mm_branch = nn.Sequential(
             nn.Linear(5, in_channels), #5是因为heart_rate, weight, height, age, sex
-            nn.BatchNorm1d(in_channels),
+            nn.ReLU(),
+            nn.Linear(in_channels, in_channels),
             nn.ReLU(),
         )
 
