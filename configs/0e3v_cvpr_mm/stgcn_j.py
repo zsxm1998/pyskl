@@ -12,7 +12,7 @@ model = dict(
     test_cfg=dict(average_clips='score'))
 
 dataset_type = 'PoseDataset'
-ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/eem_x_delay.pkl'
+ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/prefix_eem_x_delay.pkl'
 train_pipeline = [
     dict(type='PreNormalize2D'),
     dict(type='GenSkeFeat', dataset='coco', feats=['j']),

@@ -15,7 +15,7 @@ model = dict(
 #pretrained = '/medical-data/zsxm/pretrained_weight/c3d_joint_ntu60xsub2d.pth'
 
 dataset_type = 'PoseDataset'
-ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/eem_x_delay.pkl'
+ann_file = '/medical-data/zsxm/运动热量估计/eev_resized/clips/prefix_eem_x_delay.pkl'
 left_kp = [1, 3, 5, 7, 9, 11, 13, 15]
 right_kp = [2, 4, 6, 8, 10, 12, 14, 16]
 train_pipeline = [
