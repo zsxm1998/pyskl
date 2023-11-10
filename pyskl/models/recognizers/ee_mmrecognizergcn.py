@@ -46,9 +46,9 @@ class EEMMRecognizerGCN(BaseRecognizer):
         if return_loss:
             if label is None:
                 raise ValueError('Label should not be None.')
-            return self.forward_train(keypoint, label, **kwargs)
+            return self.forward_train(keypoint, heart_rate, weight, height, age, sex, label, **kwargs)
 
-        return self.forward_test(keypoint, **kwargs)
+        return self.forward_test(keypoint, heart_rate, weight, height, age, sex, **kwargs)
 
     def extract_feat(self, keypoint):
         return self.backbone(keypoint)
