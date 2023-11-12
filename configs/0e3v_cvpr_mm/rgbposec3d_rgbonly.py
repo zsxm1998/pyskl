@@ -60,14 +60,14 @@ test_pipeline = [
 ]
 data = dict(
     videos_per_gpu=8,
-    workers_per_gpu=4,
+    workers_per_gpu=8,
     test_dataloader=dict(videos_per_gpu=1),
     train=dict(
         type='RepeatDataset',
         times=1,
-        dataset=dict(type=dataset_type, ann_file=ann_file, split='train', pipeline=train_pipeline)),
-    val=dict(type=dataset_type, ann_file=ann_file, split='valid', pipeline=val_pipeline),
-    test=dict(type=dataset_type, ann_file=ann_file, split='test', pipeline=test_pipeline))
+        dataset=dict(type=dataset_type, ann_file=ann_file, split='train', pipeline=train_pipeline, data_prefix=data_root)),
+    val=dict(type=dataset_type, ann_file=ann_file, split='valid', pipeline=val_pipeline, data_prefix=data_root),
+    test=dict(type=dataset_type, ann_file=ann_file, split='test', pipeline=test_pipeline, data_prefix=data_root))
 # optimizer
 optimizer = dict(type='Lion', lr=0.0001, weight_decay=0.0005)
 optimizer_config = dict(grad_clip=dict(max_norm=40, norm_type=2))
